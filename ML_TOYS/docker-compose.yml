@@ -1,0 +1,23 @@
+
+
+
+version: "2"
+
+services:
+  mltoys:
+    image: ml_toys
+    volumes:
+      - ".:/notebook"
+    restart: always
+    ports:
+      - "8888:8888"
+
+  flask_serv:
+    image: tiangolo/uwsgi-nginx-flask:python3.6-alpine3.7
+    ports:
+      - "80:80"
+      - "443:443"
+    restart: always 
+    volumes:
+      - ".:/app"
+  

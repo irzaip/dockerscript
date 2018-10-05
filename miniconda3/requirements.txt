@@ -1,0 +1,8 @@
+tensorflow==1.8.0
+keras
+tqdm
+selenium
+gensim
+pyaudio
+nltk
+

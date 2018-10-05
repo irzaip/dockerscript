@@ -1,0 +1,8 @@
+sounddevice
+soundfile
+librosa
+Sastrawi
+google-cloud-speech
+google-cloud-storage
+gTTS
+
