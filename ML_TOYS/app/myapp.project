@@ -1,0 +1,13 @@
+[Unit]
+Description=uWSGI instance to serve myproject
+After=network.target
+
+[Service]
+User=testme
+Group=www-data
+WorkingDirectory=/app
+Environment="PATH=/app/bin"
+ExecStart=/app/bin/uwsgi --ini myproject.ini
+
+[Install]
+WantedBy=multi-user.target

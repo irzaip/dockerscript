@@ -5,35 +5,16 @@ FROM tensorflow/tensorflow:latest-py3
 # dont use --no-install-recommends 
 #RUN apt update && apt install -y python3 python3-pip portaudio19-dev python3-setuptools
 
-#RUN apt-get update && apt-get install -y \
-#    apt-utils \
-#    portaudio19-dev \
-#    python-pyaudio \
-#    libjack-jackd2-dev \
-#    curl
-#    g++ \
-#    gcc \
-#    git \
-#    libcunit1-dev \
-#    libfreetype6-dev \
-#    libleveldb-dev \
-#    libsndfile-dev \
-#    libsox* \
-#    libssl-dev \
-#    libudev-dev \
-#    libzmq3-dev \
-#    pkg-config \
-#    software-properties-common \
-#    sox \
-#    tar \
-#    unzip \
-#    wget \
-#    supervisor \
-# && rm -rf /var/lib/apt/lists/*
+RUN apt update && apt install -y nginx
 
-COPY . /app
+COPY ./app /notebooks/app
 
-RUN pip3 --no-cache-dir install -r /app/requirements.txt 
+RUN mkdir /var/log/uwsgi
+COPY ./app/default.nginx /etc/nginx/sites-available/default
+COPY ./app/run_server.sh /run_server.sh
+COPY ./app/pass.json /root/.jupyter/jupyter_notebook_config.json
+RUN chmod +x /run_server.sh
+RUN pip3 --no-cache-dir install -r /notebooks/app/requirements.txt 
 
 EXPOSE 80 443 5000
 
@@ -44,4 +25,15 @@ EXPOSE 80 443 5000
 #    python3-pip
 
 RUN apt clean autoclean && apt autoremove --yes && rm -rf /var/lib/{apt,dpkg,cache,log}/
+
+
+ENTRYPOINT ["bash", "/run_server.sh"]
+
+
+
+
+
+
+
+
 
