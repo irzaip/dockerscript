@@ -8,6 +8,7 @@ FROM tensorflow/tensorflow:latest-gpu-py3
 RUN apt update && apt install -y nginx
 
 COPY ./app /notebooks/app
+RUN chown -R www-data.www-data /notebooks/app
 
 RUN mkdir /var/log/uwsgi
 COPY ./app/default.nginx /etc/nginx/sites-available/default
