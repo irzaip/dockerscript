@@ -5,7 +5,7 @@ FROM tensorflow/tensorflow:latest-gpu-py3
 # dont use --no-install-recommends 
 #RUN apt update && apt install -y python3 python3-pip portaudio19-dev python3-setuptools
 
-RUN apt update && apt install -y nginx
+RUN apt update && apt install -y nginx git nano
 
 COPY ./app /notebooks/app
 RUN chown -R www-data.www-data /notebooks/app
