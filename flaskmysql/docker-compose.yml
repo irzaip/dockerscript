@@ -1,0 +1,21 @@
+#flaskmysql_app 97.7MB
+#python:3.6-alpine 74.2MB
+#mysql:5.7 372MB
+
+version: "2"
+services:
+  app:
+    build: ./app
+    links:
+      - db
+    ports:
+      - "5000:5000"
+
+  db:
+    image: mysql:5.7
+    ports:
+      - "32000:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+    volumes:
+      - ./db:/docker-entrypoint-initdb.d/:ro
