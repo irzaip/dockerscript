@@ -1,0 +1,1 @@
+docker run -it --rm -p 80:80 -p 443:443 -v ./applications:/home/nginx/web2py/applications irzaip/web2py:latest
