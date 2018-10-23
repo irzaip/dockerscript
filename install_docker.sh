@@ -1,7 +1,8 @@
 #!/bin/bash
 
 # uninstall old docker
-sudo apt remove -y docker docker-engine docker.io
+sudo apt remove -y docker docker-engine docker.io docker-compose
+if [ -f /usr/local/bin/docker-compose ]; then sudo rm /usr/local/bin/docker-compose; fi
 # Update the apt package index
 sudo apt update
 # Install packages to allow apt to use a repository over HTTPS
@@ -18,23 +19,44 @@ sudo apt update
 # Install the latest version of Docker CE
 sudo apt install -y docker-ce
 # install docker-compose
-sudo apt  install -y docker-compose
+# sudo apt  install -y docker-compose
+sudo curl -L "https://github.com/docker/compose/releases/download/1.22.0/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+sudo chmod +x /usr/local/bin/docker-compose
 # install json manipulation shell jq
 sudo apt install -y jq
+sudo apt autoremove -y
+sudo systemctl restart docker
 
 # install nvidia-docker2 docker plugin
 NVIDIA=
 while true
 do
-    read -r -p "Install Nvidia-Docker 2.0? [Y/n] " input
+    echo
+    read -r -p "Install Nvidia-Docker 2.0? [y/N] " input
     case $input in
         [yY][eE][sS]|[yY]) NVIDIA=1; break;;
-        [nN][oO]|[nN]) NVIDIA=0; break;;
+        [nN][oO]|[nN]|$'') NVIDIA=0; break;;
         *) echo "invalid input";;
     esac
 done
 
 if [ $NVIDIA -gt 0 ]; then
+    RED='\033[1;91m'
+    GREEN='\033[0;92m'
+    NC='\033[0m' # No Color
+
+    sudo apt update && sudo apt install -y bash-completion software-properties-common && \
+    sudo add-apt-repository ppa:graphics-drivers/ppa -y && \
+    sudo apt update && sudo apt install -y ubuntu-drivers-common lshw && \
+    sudo apt autoremove -y && \
+    hw=$(sudo ubuntu-drivers autoinstall)
+    if [[ $hw =~ ^No\ drivers* ]]; then
+        printf "\nGPU: ${RED}$hw${NC}\n\n"
+    else
+        vga=$(sudo lshw -C display)
+        printf "\n${GREEN}$vga${NC}\n\n"
+    fi
+    # ubuntu-drivers devices
     # If there is nvidia-docker 1.0 already, it needs to be removed.
     docker volume ls -q -f driver=nvidia-docker | xargs -r -I{} -n1 docker ps -q -a -f volume={} | xargs -r docker rm -f
     sudo apt purge -y nvidia-docker
@@ -55,16 +77,18 @@ sudo systemctl stop docker
 USEOTHERDIR=
 while true
 do
-    read -r -p "Change docker graph location other than (/var/lib/docker)? [Y/n] " input
+    echo
+    read -r -p "Change docker graph location other than (/var/lib/docker)? [y/N] " input
     case $input in
         [yY][eE][sS]|[yY]) USEOTHERDIR=1; break;;
-        [nN][oO]|[nN]) USEOTHERDIR=0; break;;
+        [nN][oO]|[nN]|$'') USEOTHERDIR=0; break;;
         *) echo "invalid input";;
     esac
 done
 
 DIRG=
 if [ $USEOTHERDIR -gt 0 ]; then
+    echo
     read -r -p "Your new graph location? " graph
     DIRG=$(echo $graph | sed '1 s/\/docker//' | sed -e s./$..g)
     #[ ! -d $DIRG ] && mkdir -p $DIRG
@@ -94,25 +118,31 @@ EOF
 
 fi
 
+# add user access to run other than root
+sudo usermod -G docker $(whoami)
+
 # start docker daemon
 sudo systemctl start docker
 
-# add user access to run other than root
-sudo usermod -G docker $USER
-
-RUN=
-while true
-do
-    read -r -p "Run nvidia/cuda for checking your gpu? [Y/n] " input
-    case $input in
-        [yY][eE][sS]|[yY]) RUN=1; break;;
-        [nN][oO]|[nN]) RUN=0; break;;
-        *) echo "invalid input";;
-    esac
-done
-if [ $RUN -gt 0 ]; then
-	sudo docker run --runtime=nvidia --rm nvidia/cuda nvidia-smi
+if [ $NVIDIA -gt 0 ]; then
+    RUN=
+    while true
+    do
+        echo
+        read -r -p "Run nvidia/cuda for checking your gpu? [y/N] " input
+        case $input in
+            [yY][eE][sS]|[yY]) RUN=1; break;;
+            [nN][oO]|[nN]|$'') RUN=0; break;;
+            *) echo "invalid input";;
+        esac
+    done
+    if [ $RUN -gt 0 ]; then
+	    sudo docker run --runtime=nvidia --rm nvidia/cuda nvidia-smi
+    fi
 fi
+
+# activate new group
+# sudo su -l $(whoami)
 
 echo
 cat <<EOF
