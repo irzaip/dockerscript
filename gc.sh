@@ -1,8 +1,8 @@
 #!/bin/bash
 set -e
 
-VMNAME="vmcentral"
-ZONE="us-central1-c"
+VMNAME="dl-standard"
+ZONE="us=east4-c"
 
 q="$(tr [A-Z] [a-z] <<< "$1")"
 
