@@ -8,7 +8,7 @@ Sastrawi==1.0.1
 selenium==3.14.1
 gensim==3.6.0
 pyaudio==0.2.11
-nltk==3.2.5
+nltk==3.4.5
 google-cloud-speech==0.36.0
 google-cloud-storage==1.13.0
 gTTS==2.0.1
