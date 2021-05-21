@@ -1,4 +1,4 @@
-tensorflow==1.8.0
+tensorflow==2.5.0
 keras==2.2.0
 tqdm==4.26.0
 sounddevice==0.3.12
